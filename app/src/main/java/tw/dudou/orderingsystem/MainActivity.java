@@ -1,5 +1,7 @@
 package tw.dudou.orderingsystem;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -7,7 +9,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -15,6 +19,11 @@ public class MainActivity extends ActionBarActivity {
 
     private EditText inputEditText;
     private Button sendButton;
+    private CheckBox toUpperCheckBox;
+
+    // to save all the date
+    private SharedPreferences saveState;
+    private SharedPreferences.Editor saveStateEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +35,10 @@ public class MainActivity extends ActionBarActivity {
             // onKeyListener's reference keyCode is reference in KeyEvent.KEYCODE_ENTER
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
+                // first to add to save state
+                saveStateEditor.putString("EditText",inputEditText.getText().toString());
+                saveStateEditor.commit();
+
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     if (event.getAction() == KeyEvent.ACTION_DOWN) {
                         sendTextToToast();
@@ -44,12 +57,22 @@ public class MainActivity extends ActionBarActivity {
                 sendTextToToast();
             }
         });
+
+        toUpperCheckBox = (CheckBox) findViewById(R.id.checkBox);
+
+        saveState = getSharedPreferences("Settings", Context.MODE_PRIVATE); //this notebook is private and cannot be accessed by others
+        saveStateEditor = saveState.edit();
+
+        inputEditText.setText(saveState.getString("EditText","").toString());
+
     }
 
     void sendTextToToast(){
 
         String text = inputEditText.getText().toString();
-        Toast.makeText(this,text,Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,text,Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
+        //((TextView) findViewById(R.id.textView)).setText(toUpperCheckBox.isChecked() ? text.toUpperCase() : text);
 
     }
 
