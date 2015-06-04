@@ -91,6 +91,7 @@ public class MainActivity extends ActionBarActivity {
         // 2. it has only one reference: View
         inputEditText.setText("");
         saveStateEditor.remove("EditText");
+        saveStateEditor.commit();
     }
 
 
