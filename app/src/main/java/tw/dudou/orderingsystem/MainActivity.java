@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,12 +22,12 @@ public class MainActivity extends ActionBarActivity {
     private Button sendButton;
     private CheckBox toUpperCheckBox;
 
-    // to save all the date
+    // to save all the data to /data/data/tw.dudou.ordersystem/shared_prefs/setting.xml
     private SharedPreferences saveState;
     private SharedPreferences.Editor saveStateEditor;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -36,7 +37,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 // first to add to save state
-                saveStateEditor.putString("EditText",inputEditText.getText().toString());
+                saveStateEditor.putString("EditText", inputEditText.getText().toString());
                 saveStateEditor.commit();
 
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -59,11 +60,19 @@ public class MainActivity extends ActionBarActivity {
         });
 
         toUpperCheckBox = (CheckBox) findViewById(R.id.checkBox);
+        toUpperCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                saveStateEditor.putBoolean("checkBox",isChecked);
+                saveStateEditor.commit();
+            }
+        });
 
         saveState = getSharedPreferences("Settings", Context.MODE_PRIVATE); //this notebook is private and cannot be accessed by others
         saveStateEditor = saveState.edit();
 
-        inputEditText.setText(saveState.getString("EditText","").toString());
+        inputEditText.setText(saveState.getString("EditText", "").toString());
+        toUpperCheckBox.setChecked(saveState.getBoolean("checkBox",false));
 
     }
 
@@ -81,6 +90,7 @@ public class MainActivity extends ActionBarActivity {
         // 1. it is a public function
         // 2. it has only one reference: View
         inputEditText.setText("");
+        saveStateEditor.remove("EditText");
     }
 
 
