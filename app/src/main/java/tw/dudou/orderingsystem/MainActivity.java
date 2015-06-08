@@ -9,10 +9,12 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +24,7 @@ public class MainActivity extends ActionBarActivity {
     private EditText inputEditText;
     private Button sendButton;
     private CheckBox toUpperCheckBox;
+    private ListView historyListView;
 
     // to save all the data to /data/data/tw.dudou.ordersystem/shared_prefs/setting.xml
     private SharedPreferences saveState;
@@ -60,6 +63,8 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        historyListView = (ListView) findViewById(R.id.logView);
+
         toUpperCheckBox = (CheckBox) findViewById(R.id.checkBox);
         toUpperCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -75,18 +80,32 @@ public class MainActivity extends ActionBarActivity {
         inputEditText.setText(saveState.getString("EditText", "").toString());
         toUpperCheckBox.setChecked(saveState.getBoolean("checkBox",false));
 
+        setHistoryData();
+
     }
 
-    void sendTextToToast(){
+    private void setHistoryData(){
+
+        String buf = Utils.readFile(this,"LogHistory.txt");
+        String[] entries = buf.split("\n");
+
+        ArrayAdapter<String> histroyLog =
+                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
+        historyListView.setAdapter(histroyLog);
+
+    }
+
+    private void sendTextToToast(){
 
         String text = inputEditText.getText().toString();
         //Toast.makeText(this,text,Toast.LENGTH_SHORT).show();
         //Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
         //((TextView) findViewById(R.id.textView)).setText(toUpperCheckBox.isChecked() ? text.toUpperCase() : text);
         Utils.writeFile(this,"LogHistory.txt",text + "\n");
-        text = Utils.readFile(this,"LogHistory.txt");
+        //text = Utils.readFile(this,"LogHistory.txt");
         //Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
-        ((TextView) findViewById(R.id.logView)).setText(text);
+        //((TextView) findViewById(R.id.logView)).setText(text);
+        setHistoryData();
     }
 
     public void send2(View view){
