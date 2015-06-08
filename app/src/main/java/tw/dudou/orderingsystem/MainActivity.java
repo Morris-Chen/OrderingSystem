@@ -1,6 +1,7 @@
 package tw.dudou.orderingsystem;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -117,6 +118,13 @@ public class MainActivity extends ActionBarActivity {
         saveStateEditor.commit();
     }
 
+    public void goToMenu(View view){
+
+        Intent intent = new Intent();
+        intent.setClass(this,MenuActivity.class);
+        startActivity(intent);
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
