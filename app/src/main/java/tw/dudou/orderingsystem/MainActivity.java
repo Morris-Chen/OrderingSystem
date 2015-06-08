@@ -42,7 +42,7 @@ public class MainActivity extends ActionBarActivity {
                 saveStateEditor.commit();
 
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN && !inputEditText.getText().toString().isEmpty()) {
                         sendTextToToast();
                         return true; // if you don't want to continue the key press to continue processing, return true.
                     }
@@ -81,10 +81,12 @@ public class MainActivity extends ActionBarActivity {
 
         String text = inputEditText.getText().toString();
         //Toast.makeText(this,text,Toast.LENGTH_SHORT).show();
-        Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
         //((TextView) findViewById(R.id.textView)).setText(toUpperCheckBox.isChecked() ? text.toUpperCase() : text);
-        Utils.writeFile(this,text + "\n");
-
+        Utils.writeFile(this,"LogHistory.txt",text + "\n");
+        text = Utils.readFile(this,"LogHistory.txt");
+        //Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
+        ((TextView) findViewById(R.id.logView)).setText(text);
     }
 
     public void send2(View view){
