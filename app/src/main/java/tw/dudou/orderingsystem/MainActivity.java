@@ -2,6 +2,7 @@ package tw.dudou.orderingsystem;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -82,6 +83,7 @@ public class MainActivity extends ActionBarActivity {
         //Toast.makeText(this,text,Toast.LENGTH_SHORT).show();
         Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
         //((TextView) findViewById(R.id.textView)).setText(toUpperCheckBox.isChecked() ? text.toUpperCase() : text);
+        Utils.writeFile(this,text + "\n");
 
     }
 
