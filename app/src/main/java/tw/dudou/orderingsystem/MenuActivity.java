@@ -6,6 +6,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MenuActivity extends ActionBarActivity {
@@ -26,8 +29,30 @@ public class MenuActivity extends ActionBarActivity {
         button.setText(String.valueOf(count));
     }
 
-    public void sendOrder(View view){
+    public String getSummary(){
 
+        LinearLayout root = (LinearLayout) findViewById(R.id.root);
+        int count = root.getChildCount();
+        String all ="";
+        for (int i = 0; i < count -1; i++ ){
+            LinearLayout item = (LinearLayout) root.getChildAt(i);
+            int item_layout = item.getChildCount();
+            String item_name = ((TextView)item.getChildAt(0)).getText().toString();
+            all += item_name +",";
+            int[] item_count =new int[3];
+            for (int j=1;j<item_layout;j++ ) {
+                item_count[j-1]=Integer.parseInt(((TextView) item.getChildAt(j)).getText().toString());
+
+            }
+            for (int j=0;j<3;j++) {
+                all += String.valueOf(item_count[j]) + ",";
+            }
+            all += "\n";
+        }
+        return all;
+    }
+    public void sendOrder(View view){
+        Toast.makeText(this,getSummary(),Toast.LENGTH_LONG).show();
         finish();
     }
 
