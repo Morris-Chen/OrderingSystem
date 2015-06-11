@@ -4,6 +4,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 
 public class MenuActivity extends ActionBarActivity {
@@ -12,6 +14,21 @@ public class MenuActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
+    }
+
+
+    public void pick(View view){
+
+        Button button = (Button) view;
+        String stringInButton = button.getText().toString();
+        int count = Integer.parseInt(stringInButton) + 1;
+
+        button.setText(String.valueOf(count));
+    }
+
+    public void sendOrder(View view){
+
+        finish();
     }
 
     @Override
