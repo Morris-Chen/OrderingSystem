@@ -10,6 +10,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class MenuActivity extends ActionBarActivity {
 
@@ -33,24 +37,57 @@ public class MenuActivity extends ActionBarActivity {
 
         LinearLayout root = (LinearLayout) findViewById(R.id.root);
         int count = root.getChildCount();
-        String all ="";
+        JSONObject result = new JSONObject();
+        JSONArray items = new JSONArray();
+
         for (int i = 0; i < count -1; i++ ){
+
+            JSONObject itemStatus = new JSONObject();
+
             LinearLayout item = (LinearLayout) root.getChildAt(i);
             int item_layout = item.getChildCount();
-            String item_name = ((TextView)item.getChildAt(0)).getText().toString();
-            all += item_name +",";
-            int[] item_count =new int[3];
-            for (int j=1;j<item_layout;j++ ) {
-                item_count[j-1]=Integer.parseInt(((TextView) item.getChildAt(j)).getText().toString());
 
+            String item_name = ((TextView)item.getChildAt(0)).getText().toString();
+
+            int[] item_type =new int[3]; // HARD CODE there will be no more than 4 types
+            boolean isEmpty = true;
+
+            for (int j=1;j<item_layout;j++ ) {
+                item_type[j-1]=Integer.parseInt(((TextView) item.getChildAt(j)).getText().toString());
+                if(isEmpty) isEmpty = item_type[j-1] == 0;
             }
+
+            if (isEmpty) {
+                continue;
+            }
+
+            try {
+                itemStatus.put("itemName",item_name);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             for (int j=0;j<3;j++) {
-                all += String.valueOf(item_count[j]) + ",";
+                try {
+                    if(item_type[j] !=0) {
+                        itemStatus.put("Type" + String.valueOf(j), item_type[j]);
+                    }
+                } catch (JSONException e){
+                    e.printStackTrace();
+                }
             }
-            all += "\n";
+            items.put(itemStatus);
         }
-        return all;
+        try {
+            result.put("Result", items);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return result.toString();
     }
+
+
     public void sendOrder(View view){
         Toast.makeText(this,getSummary(),Toast.LENGTH_LONG).show();
         finish();
