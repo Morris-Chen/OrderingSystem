@@ -1,5 +1,6 @@
 package tw.dudou.orderingsystem;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -70,7 +71,7 @@ public class MenuActivity extends ActionBarActivity {
             for (int j=0;j<3;j++) {
                 try {
                     if(item_type[j] !=0) {
-                        itemStatus.put("Type" + String.valueOf(j), item_type[j]);
+                        itemStatus.put("Type" + j, item_type[j]);
                     }
                 } catch (JSONException e){
                     e.printStackTrace();
@@ -89,7 +90,12 @@ public class MenuActivity extends ActionBarActivity {
 
 
     public void sendOrder(View view){
-        Toast.makeText(this,getSummary(),Toast.LENGTH_LONG).show();
+        // declare a intent to go back, set data, set result code
+        Intent intent = new Intent();
+        intent.putExtra("orderList" , getSummary());
+
+
+        setResult(RESULT_OK);
         finish();
     }
 

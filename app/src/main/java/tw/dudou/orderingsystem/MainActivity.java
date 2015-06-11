@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
+    private static final int MENU_ORDER_ACTIVITY = 1;
     private EditText inputEditText;
     private Button sendButton;
     private CheckBox toUpperCheckBox;
@@ -122,8 +124,19 @@ public class MainActivity extends ActionBarActivity {
 
         Intent intent = new Intent();
         intent.setClass(this,MenuActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, MENU_ORDER_ACTIVITY);
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d("debug", "" + requestCode);
+        Log.d("debug", "" + resultCode);
+        if(requestCode == MENU_ORDER_ACTIVITY && resultCode ==RESULT_OK) {
+            Log.d("debug", data.getStringExtra("orderList"));
+        }
     }
 
     @Override
