@@ -2,6 +2,10 @@ package tw.dudou.orderingsystem;
 
 import android.content.Context;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -43,5 +47,43 @@ public class Utils {
         }
 
         return "";
+    }
+
+    public static String parseItemSummary(Context context, String jsonText){
+        String text = "";
+        return text;
+    }
+    public static int parseItemTotalNum(Context context, String jsonText){
+        int ret = 0;
+        try {
+            JSONArray menuJSON = new JSONArray(jsonText);
+            for (int i=0;i<menuJSON.length();i++){
+                JSONObject menuItem = menuJSON.getJSONObject(i);
+                if(menuItem.has("Type0")) ret += menuItem.getInt("Type0");
+                if(menuItem.has("Type1")) ret += menuItem.getInt("Type1");
+                if(menuItem.has("Type2")) ret += menuItem.getInt("Type2");
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+    public static String parseItemName(Context context, String jsonText){
+        String text = "";
+
+        try {
+            JSONArray menuJSON = new JSONArray(jsonText);
+            for (int i=0;i<menuJSON.length();i++){
+                JSONObject menuItem = menuJSON.getJSONObject(i);
+                String Name = menuItem.getString("itemName");
+                text += Name;
+                text += ", ";
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return text.substring(0,text.lastIndexOf(", "));
     }
 }

@@ -17,13 +17,28 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.parse.Parse;
+import com.parse.ParseObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends ActionBarActivity {
 
     private static final int MENU_ORDER_ACTIVITY = 1;
+    private JSONObject menuInfo;
+
     private EditText inputEditText;
     private Button sendButton;
     private CheckBox toUpperCheckBox;
@@ -37,6 +52,12 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Enable Local Datastore.
+        Parse.enableLocalDatastore(this);
+        Parse.initialize(this, "l6vG5tGkW0lZxWYvM7KIoW2lQNY8Ui2oaPhRtYMh",
+                "9LGsSlN6BO9dnpA740y5oX1OCP0iLeD0dPVwEfF6");
+
 
         inputEditText = (EditText) findViewById(R.id.editText);
         inputEditText.setOnKeyListener(new View.OnKeyListener() {
@@ -89,25 +110,67 @@ public class MainActivity extends ActionBarActivity {
 
     private void setHistoryData(){
 
-        String buf = Utils.readFile(this,"LogHistory.txt");
+        String buf = Utils.readFile(this, "LogHistory.txt");
         String[] entries = buf.split("\n");
 
-        ArrayAdapter<String> histroyLog =
-                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
-        historyListView.setAdapter(histroyLog);
+        List<Map<String,String>> mapData = new ArrayList<>();
+
+        for (int i = 0;i<entries.length;i++){
+
+            Map <String,String> item = new HashMap<>();
+            try {
+                JSONObject order = new JSONObject(entries[i]);
+                String note = order.getString("note");
+
+                item.put("note",note);
+
+                if (order.has("menu")) {
+                    JSONArray menu = order.getJSONArray("menu");
+                    item.put("orderItem", Utils.parseItemName(this,menu.toString()));
+                    item.put("orderNum", "" + Utils.parseItemTotalNum(this,menu.toString()));
+                }
+                mapData.add(item);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        String[] from = {"note", "orderItem", "orderNum"};
+        int[] to = {R.id.note,R.id.drinkName,R.id.drinkNum};
+        //ArrayAdapter<String> historyLog = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
+        SimpleAdapter adapter_Log = new SimpleAdapter(this, mapData, R.layout.order_list_item,from, to);
+        historyListView.setAdapter(adapter_Log);
 
     }
 
     private void sendTextToToast(){
 
         String text = inputEditText.getText().toString();
-        //Toast.makeText(this,text,Toast.LENGTH_SHORT).show();
-        //Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
-        //((TextView) findViewById(R.id.textView)).setText(toUpperCheckBox.isChecked() ? text.toUpperCase() : text);
-        Utils.writeFile(this,"LogHistory.txt",text + "\n");
-        //text = Utils.readFile(this,"LogHistory.txt");
-        //Toast.makeText(this,toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text,Toast.LENGTH_SHORT).show();
-        //((TextView) findViewById(R.id.logView)).setText(text);
+        JSONObject order = new JSONObject();
+
+
+        text = toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text;
+
+        try{
+            order.put("note", text);
+            if (menuInfo !=null){
+                order.put("menu",menuInfo.getJSONArray("Result"));
+            }
+
+            //use Parse.com to save entities
+            ParseObject orderObject = new ParseObject("Order");
+            orderObject.put("note", order.getString("note"));
+            orderObject.put("menu", order.getJSONArray("menu"));
+            orderObject.saveInBackground();
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Utils.writeFile(this,"LogHistory.txt",order.toString()+ "\n");
+
         setHistoryData();
     }
 
@@ -132,10 +195,19 @@ public class MainActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.d("debug", "" + requestCode);
-        Log.d("debug", "" + resultCode);
-        if(requestCode == MENU_ORDER_ACTIVITY && resultCode ==RESULT_OK) {
-            Log.d("debug", data.getStringExtra("orderList"));
+        Log.d("dudoudebug", "" + requestCode);
+        Log.d("dudoudebug", "" + resultCode);
+        if(requestCode == MENU_ORDER_ACTIVITY && resultCode == RESULT_OK) {
+            Log.d("dudoudebug", data.getStringExtra("orderList"));
+            try {
+                menuInfo = new JSONObject(data.getStringExtra("orderList"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            /* TODO , find a better way to show the menu already selected
+            TextView ordertemp = (TextView) findViewById(R.id.textView5);
+            ordertemp.setText(Utils.parseItem(this,menuInfo.toString()));
+            */
         }
     }
 

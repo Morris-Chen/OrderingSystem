@@ -95,7 +95,7 @@ public class MenuActivity extends ActionBarActivity {
         intent.putExtra("orderList" , getSummary());
 
 
-        setResult(RESULT_OK);
+        setResult(RESULT_OK,intent);
         finish();
     }
 
