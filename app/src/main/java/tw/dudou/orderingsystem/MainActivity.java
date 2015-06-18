@@ -77,7 +77,7 @@ public class MainActivity extends ActionBarActivity {
 
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     if (event.getAction() == KeyEvent.ACTION_DOWN && !inputEditText.getText().toString().isEmpty()) {
-                        sendTextToToast();
+                        sendOrder();
                         return true; // if you don't want to continue the key press to continue processing, return true.
                     }
                 }
@@ -92,7 +92,7 @@ public class MainActivity extends ActionBarActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendTextToToast();
+                sendOrder();
             }
         });
 
@@ -107,7 +107,8 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        saveState = getSharedPreferences("Settings", Context.MODE_PRIVATE); //this notebook is private and cannot be accessed by others
+        saveState = getSharedPreferences("Settings", Context.MODE_PRIVATE);
+        //this setting is private and cannot be accessed by others
         saveStateEditor = saveState.edit();
 
         inputEditText.setText(saveState.getString("EditText", "").toString());
@@ -120,10 +121,22 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void setStoreData(){
-        String[] dataList = getResources().getStringArray(R.array.store_name);
+        //String[] dataList = getResources().getStringArray(R.array.store_name);
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("StoreInfo");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                List<String> dataList = new ArrayList<String>();
+                for (ParseObject object : list) {
+                    dataList.add(object.getString("name") + "," + object.getString("address"));
 
-        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,dataList);
-        spinner.setAdapter(adapter);
+                    ArrayAdapter adapter = new ArrayAdapter<String>(
+                            MainActivity.this, android.R.layout.simple_spinner_item, dataList);
+                    spinner.setAdapter(adapter);
+                }
+            }
+        });
+
 
     }
     private void setHistoryData(){
@@ -161,7 +174,7 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    private void sendTextToToast(){
+    private void sendOrder(){
 
         String text = inputEditText.getText().toString();
         JSONObject order = new JSONObject();
@@ -177,6 +190,8 @@ public class MainActivity extends ActionBarActivity {
             if (menuInfo !=null){
                 order.put("menu",menuInfo.getJSONArray("Result"));
             }
+
+            
 
             //use Parse.com to save entities
             ParseObject orderObject = new ParseObject("Order");
