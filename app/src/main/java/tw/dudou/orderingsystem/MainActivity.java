@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -43,6 +45,7 @@ import java.util.Map;
 public class MainActivity extends ActionBarActivity {
 
     private static final int MENU_ORDER_ACTIVITY = 1;
+    private static final int TAKE_PHOTO_ACTIVITY = 2;
     private JSONObject menuInfo;
 
     private EditText inputEditText;
@@ -97,6 +100,12 @@ public class MainActivity extends ActionBarActivity {
         });
 
         historyListView = (ListView) findViewById(R.id.logView);
+        historyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                gotoOrderDetail();
+            }
+        });
 
         toUpperCheckBox = (CheckBox) findViewById(R.id.checkBox);
         toUpperCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -118,6 +127,12 @@ public class MainActivity extends ActionBarActivity {
         setStoreData();
         setHistoryData();
 
+    }
+
+    private void gotoOrderDetail(){
+        Intent intent = new Intent();
+        intent.setClass(this,orderDetailActivity.class);
+        startActivity(intent);
     }
 
     private void setStoreData(){
@@ -164,7 +179,7 @@ public class MainActivity extends ActionBarActivity {
                 }
 
 
-                String[] from = {"note", "orderItem", "orderNum","storeInfo"};
+                String[] from = {"note", "orderItem", "orderNum", "storeInfo"};
                 int[] to = {R.id.note, R.id.drinkName, R.id.drinkNum, R.id.storeInfo};
                 //ArrayAdapter<String> historyLog = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
                 SimpleAdapter adapter_Log = new SimpleAdapter(MainActivity.this, mapData, R.layout.order_list_item, from, to);
@@ -238,6 +253,12 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    public void gotoCamera(){
+        Intent intent = new Intent();
+        intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent,TAKE_PHOTO_ACTIVITY);
+    }
+
     private void showMenu(){
 
         TextView orderTemp = (TextView) findViewById(R.id.textView5);
@@ -279,8 +300,9 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_take_photo) {
+
+            gotoCamera();
         }
 
         return super.onOptionsItemSelected(item);
