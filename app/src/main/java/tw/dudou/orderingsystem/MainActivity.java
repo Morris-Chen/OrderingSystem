@@ -158,13 +158,14 @@ public class MainActivity extends ActionBarActivity {
                     item.put("note", note);
                     item.put("orderItem", Utils.parseItemName(MainActivity.this, menuInfo.toString()));
                     item.put("orderNum", "" + Utils.parseItemTotalNum(MainActivity.this, menuInfo.toString()));
+                    item.put("storeInfo", order.getString("storeinfo"));
 
                     mapData.add(item);
                 }
 
 
-                String[] from = {"note", "orderItem", "orderNum"};
-                int[] to = {R.id.note, R.id.drinkName, R.id.drinkNum};
+                String[] from = {"note", "orderItem", "orderNum","storeInfo"};
+                int[] to = {R.id.note, R.id.drinkName, R.id.drinkNum, R.id.storeInfo};
                 //ArrayAdapter<String> historyLog = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
                 SimpleAdapter adapter_Log = new SimpleAdapter(MainActivity.this, mapData, R.layout.order_list_item, from, to);
                 historyListView.setAdapter(adapter_Log);
@@ -184,6 +185,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         text = toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text;
+        String storeInfo = (String) spinner.getSelectedItem();
 
         try{
             order.put("note", text);
@@ -191,12 +193,11 @@ public class MainActivity extends ActionBarActivity {
                 order.put("menu",menuInfo.getJSONArray("Result"));
             }
 
-            
-
             //use Parse.com to save entities
             ParseObject orderObject = new ParseObject("Order");
             orderObject.put("note", order.getString("note"));
             orderObject.put("menu", order.getJSONArray("menu"));
+            orderObject.put("storeinfo", storeInfo);
             orderObject.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
@@ -228,7 +229,10 @@ public class MainActivity extends ActionBarActivity {
 
     public void goToMenu(View view){
 
+        String storeInfo = (String) spinner.getSelectedItem();
+
         Intent intent = new Intent();
+        intent.putExtra("storeInfo", storeInfo);
         intent.setClass(this, MenuActivity.class);
         startActivityForResult(intent, MENU_ORDER_ACTIVITY);
 
@@ -237,7 +241,7 @@ public class MainActivity extends ActionBarActivity {
     private void showMenu(){
 
         TextView orderTemp = (TextView) findViewById(R.id.textView5);
-        orderTemp.setText(menuInfo==null ? "" : Utils.parseItemSummary(this, menuInfo.toString()));
+        orderTemp.setText(menuInfo==null ? "Menu: " : "Menu:\n"+Utils.parseItemSummary(this, menuInfo.toString()));
 
     }
 

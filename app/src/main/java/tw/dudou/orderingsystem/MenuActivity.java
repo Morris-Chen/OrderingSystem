@@ -17,17 +17,21 @@ import org.json.JSONObject;
 
 
 public class MenuActivity extends ActionBarActivity {
-
+    private TextView storeInfoTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
+
+
+        storeInfoTextView = (TextView) findViewById(R.id.storeInfo);
+        storeInfoTextView.setText(getIntent().getStringExtra("storeInfo"));
     }
     public void resetOrder(View view){
         LinearLayout root = (LinearLayout) findViewById(R.id.root);
         int count = root.getChildCount();
 
-        for (int i = 0; i < count -1; i++ ){
+        for (int i = 1; i < count -1; i++ ){
             LinearLayout item = (LinearLayout) root.getChildAt(i);
             int item_layout = item.getChildCount();
             for (int j=1;j<item_layout;j++ ) {
@@ -52,7 +56,7 @@ public class MenuActivity extends ActionBarActivity {
         JSONObject result = new JSONObject();
         JSONArray items = new JSONArray();
 
-        for (int i = 0; i < count -1; i++ ){
+        for (int i = 1; i < count -1; i++ ){
 
             JSONObject itemStatus = new JSONObject();
 
