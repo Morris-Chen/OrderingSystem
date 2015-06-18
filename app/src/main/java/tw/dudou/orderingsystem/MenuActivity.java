@@ -23,7 +23,18 @@ public class MenuActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
     }
+    public void resetOrder(View view){
+        LinearLayout root = (LinearLayout) findViewById(R.id.root);
+        int count = root.getChildCount();
 
+        for (int i = 0; i < count -1; i++ ){
+            LinearLayout item = (LinearLayout) root.getChildAt(i);
+            int item_layout = item.getChildCount();
+            for (int j=1;j<item_layout;j++ ) {
+                ((TextView)item.getChildAt(j)).setText("0");
+            }
+        }
+    }
 
     public void pick(View view){
 

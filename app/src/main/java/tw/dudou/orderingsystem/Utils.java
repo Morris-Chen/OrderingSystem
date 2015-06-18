@@ -50,7 +50,23 @@ public class Utils {
     }
 
     public static String parseItemSummary(Context context, String jsonText){
-        String text = "";
+        String text = "Menu: \n";
+        try {
+            JSONObject input = new JSONObject(jsonText);
+            JSONArray menuJSON = input.getJSONArray("Result");
+            for (int i =0;i<menuJSON.length();i++){
+                JSONObject menuItem = menuJSON.getJSONObject(i);
+                text+= menuItem.getString("itemName") + ": ";
+                if(menuItem.has("Type0")) text += "S["+menuItem.getInt("Type0")+"] ";
+                if(menuItem.has("Type1")) text += "M["+menuItem.getInt("Type1")+"] ";
+                if(menuItem.has("Type2")) text += "L["+menuItem.getInt("Type2")+"] ";
+                text.trim();
+                text +="\n";
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         return text;
     }
     public static int parseItemTotalNum(Context context, String jsonText){

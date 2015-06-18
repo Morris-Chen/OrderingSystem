@@ -137,7 +137,8 @@
             android:layout_height="wrap_content"
             android:text="Reset"
             android:id="@+id/button13"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:onClick="resetOrder" />
 
         <Button
             android:layout_width="0dp"

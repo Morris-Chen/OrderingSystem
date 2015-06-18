@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -18,11 +19,16 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.Parse;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +49,7 @@ public class MainActivity extends ActionBarActivity {
     private Button sendButton;
     private CheckBox toUpperCheckBox;
     private ListView historyListView;
+    private Spinner spinner;
 
     // to save all the data to /data/data/tw.dudou.ordersystem/shared_prefs/setting.xml
     private SharedPreferences saveState;
@@ -79,6 +86,8 @@ public class MainActivity extends ActionBarActivity {
         });
 
 
+        spinner = (Spinner) findViewById(R.id.spinner);
+
         sendButton = (Button) findViewById(R.id.button);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,43 +113,51 @@ public class MainActivity extends ActionBarActivity {
         inputEditText.setText(saveState.getString("EditText", "").toString());
         toUpperCheckBox.setChecked(saveState.getBoolean("checkBox",false));
 
+
+        setStoreData();
         setHistoryData();
 
     }
 
+    private void setStoreData(){
+        String[] dataList = getResources().getStringArray(R.array.store_name);
+
+        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,dataList);
+        spinner.setAdapter(adapter);
+
+    }
     private void setHistoryData(){
 
-        String buf = Utils.readFile(this, "LogHistory.txt");
-        String[] entries = buf.split("\n");
+        final List<Map<String, String>> mapData = new ArrayList<>();
 
-        List<Map<String,String>> mapData = new ArrayList<>();
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Order");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                for (int i = 0; i < list.size(); i++) {
+                    Map<String, String> item = new HashMap<>();
 
-        for (int i = 0;i<entries.length;i++){
+                    ParseObject order = list.get(i);
 
-            Map <String,String> item = new HashMap<>();
-            try {
-                JSONObject order = new JSONObject(entries[i]);
-                String note = order.getString("note");
+                    String note = order.getString("note");
+                    JSONArray menuInfo = order.getJSONArray("menu");
 
-                item.put("note",note);
+                    item.put("note", note);
+                    item.put("orderItem", Utils.parseItemName(MainActivity.this, menuInfo.toString()));
+                    item.put("orderNum", "" + Utils.parseItemTotalNum(MainActivity.this, menuInfo.toString()));
 
-                if (order.has("menu")) {
-                    JSONArray menu = order.getJSONArray("menu");
-                    item.put("orderItem", Utils.parseItemName(this,menu.toString()));
-                    item.put("orderNum", "" + Utils.parseItemTotalNum(this,menu.toString()));
+                    mapData.add(item);
                 }
-                mapData.add(item);
-            } catch (JSONException e) {
-                e.printStackTrace();
+
+
+                String[] from = {"note", "orderItem", "orderNum"};
+                int[] to = {R.id.note, R.id.drinkName, R.id.drinkNum};
+                //ArrayAdapter<String> historyLog = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
+                SimpleAdapter adapter_Log = new SimpleAdapter(MainActivity.this, mapData, R.layout.order_list_item, from, to);
+                historyListView.setAdapter(adapter_Log);
             }
+        });
 
-        }
-
-        String[] from = {"note", "orderItem", "orderNum"};
-        int[] to = {R.id.note,R.id.drinkName,R.id.drinkNum};
-        //ArrayAdapter<String> historyLog = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
-        SimpleAdapter adapter_Log = new SimpleAdapter(this, mapData, R.layout.order_list_item,from, to);
-        historyListView.setAdapter(adapter_Log);
 
     }
 
@@ -148,7 +165,10 @@ public class MainActivity extends ActionBarActivity {
 
         String text = inputEditText.getText().toString();
         JSONObject order = new JSONObject();
-
+        if(menuInfo==null) {
+            Toast.makeText(this,"You haven't select any drinks!",Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         text = toUpperCheckBox.isChecked()?text.replaceAll(".","*"):text;
 
@@ -162,16 +182,21 @@ public class MainActivity extends ActionBarActivity {
             ParseObject orderObject = new ParseObject("Order");
             orderObject.put("note", order.getString("note"));
             orderObject.put("menu", order.getJSONArray("menu"));
-            orderObject.saveInBackground();
+            orderObject.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    Log.d("debug","done");
+                    setHistoryData();
+                }
+            });
 
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Utils.writeFile(this,"LogHistory.txt",order.toString()+ "\n");
+        Utils.writeFile(this, "LogHistory.txt", order.toString() + "\n");
 
-        setHistoryData();
     }
 
     public void send2(View view){
@@ -181,13 +206,23 @@ public class MainActivity extends ActionBarActivity {
         inputEditText.setText("");
         saveStateEditor.remove("EditText");
         saveStateEditor.commit();
+        menuInfo = null;
+        showMenu();
+
     }
 
     public void goToMenu(View view){
 
         Intent intent = new Intent();
-        intent.setClass(this,MenuActivity.class);
+        intent.setClass(this, MenuActivity.class);
         startActivityForResult(intent, MENU_ORDER_ACTIVITY);
+
+    }
+
+    private void showMenu(){
+
+        TextView orderTemp = (TextView) findViewById(R.id.textView5);
+        orderTemp.setText(menuInfo==null ? "" : Utils.parseItemSummary(this, menuInfo.toString()));
 
     }
 
@@ -204,10 +239,9 @@ public class MainActivity extends ActionBarActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            /* TODO , find a better way to show the menu already selected
-            TextView ordertemp = (TextView) findViewById(R.id.textView5);
-            ordertemp.setText(Utils.parseItem(this,menuInfo.toString()));
-            */
+            // TODO , find a better way to show the menu already selected (done).
+            showMenu();
+
         }
     }
 
