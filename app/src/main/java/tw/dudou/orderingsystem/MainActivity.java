@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
@@ -57,9 +58,12 @@ public class MainActivity extends ActionBarActivity {
     private ListView historyListView;
     private Spinner spinner;
 
+
     // to save all the data to /data/data/tw.dudou.ordersystem/shared_prefs/setting.xml
     private SharedPreferences saveState;
     private SharedPreferences.Editor saveStateEditor;
+    private boolean hasPhoto = false;
+    private Bitmap bitmap;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -216,11 +220,15 @@ public class MainActivity extends ActionBarActivity {
             orderObject.put("note", order.getString("note"));
             orderObject.put("menu", order.getJSONArray("menu"));
             orderObject.put("storeinfo", storeInfo);
+            if (hasPhoto){
+                ParseFile file = new ParseFile("photo.png",Utils.bitmapToBytes(bitmap));
+            }
             orderObject.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
-                    Log.d("debug","done");
+                    Log.d("debug", "done");
                     setHistoryData();
+                    send2(sendButton);
                 }
             });
 
@@ -290,7 +298,8 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case TAKE_PHOTO_ACTIVITY:
                 if(resultCode == RESULT_OK){
-                    Bitmap bitmap = data.getParcelableExtra("data");
+                    hasPhoto = true;
+                    bitmap = data.getParcelableExtra("data");
                     ImageView photo = (ImageView) findViewById(R.id.imageView);
                     photo.setImageBitmap(bitmap);
                 }

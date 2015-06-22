@@ -41,13 +41,17 @@
         android:layout_alignLeft="@+id/button3"
         android:layout_alignStart="@+id/button3" />
 
-    <ListView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/logView"
-        android:layout_below="@+id/imageView"
+        android:id="@+id/textView5"
+        android:layout_alignBottom="@+id/button2"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/button3"
+        android:layout_toStartOf="@+id/button3"
+        android:layout_below="@+id/editText"
+        android:text="Menu:\n(Empty)" />
 
     <Button
         android:layout_width="wrap_content"
@@ -59,17 +63,13 @@
         android:layout_toStartOf="@+id/button"
         android:onClick="goToMenu" />
 
-    <TextView
+    <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView5"
-        android:layout_alignBottom="@+id/button2"
+        android:id="@+id/logView"
+        android:layout_below="@+id/imageView"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@+id/button3"
-        android:layout_toStartOf="@+id/button3"
-        android:layout_below="@+id/editText"
-        android:text="Order:" />
+        android:layout_alignParentStart="true" />
 
     <Spinner
         android:layout_width="wrap_content"

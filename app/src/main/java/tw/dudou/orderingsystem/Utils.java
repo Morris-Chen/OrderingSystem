@@ -1,11 +1,13 @@
 package tw.dudou.orderingsystem;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -50,7 +52,7 @@ public class Utils {
     }
 
     public static String parseItemSummary(Context context, String jsonText){
-        String text = "Menu: \n";
+        String text = "";
         try {
             JSONObject input = new JSONObject(jsonText);
             JSONArray menuJSON = input.getJSONArray("Result");
@@ -101,5 +103,10 @@ public class Utils {
             e.printStackTrace();
         }
         return text.substring(0,text.lastIndexOf(", "));
+    }
+    public static byte[] bitmapToBytes(Bitmap bitmap){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100,baos);
+        return baos.toByteArray();
     }
 }
