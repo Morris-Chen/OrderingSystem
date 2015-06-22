@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -69,11 +70,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Enable Local Datastore.
-        Parse.enableLocalDatastore(this);
-        Parse.initialize(this, "l6vG5tGkW0lZxWYvM7KIoW2lQNY8Ui2oaPhRtYMh",
-                "9LGsSlN6BO9dnpA740y5oX1OCP0iLeD0dPVwEfF6");
 
 
         inputEditText = (EditText) findViewById(R.id.editText);
@@ -221,14 +217,15 @@ public class MainActivity extends ActionBarActivity {
             orderObject.put("menu", order.getJSONArray("menu"));
             orderObject.put("storeinfo", storeInfo);
             if (hasPhoto){
-                ParseFile file = new ParseFile("photo.png",Utils.bitmapToBytes(bitmap));
+                ParseFile file = new ParseFile("photo.png",Utils.uriToBytes(this,Utils.getOutputUri()));
+                orderObject.put("photo",file);
             }
             orderObject.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
                     Log.d("debug", "done");
                     setHistoryData();
-                    send2(sendButton);
+                    clearAll();
                 }
             });
 
@@ -241,16 +238,22 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    public void send2(View view){
-        // if declare to xml: onClick, the function if and on if follows:
-        // 1. it is a public function
-        // 2. it has only one reference: View
+    private void clearAll(){
         inputEditText.setText("");
         saveStateEditor.remove("EditText");
         saveStateEditor.commit();
         menuInfo = null;
-        showMenu();
-
+        bitmap = null;
+        hasPhoto = false;
+        ImageView photo = (ImageView) findViewById(R.id.imageView);
+        TextView menu = (TextView) findViewById(R.id.textView5);
+        menu.setText("Menu:\n(Empty)");
+    }
+    public void send2(View view){
+        // if declare to xml: onClick, the function if and on if follows:
+        // 1. it is a public function
+        // 2. it has only one reference: View
+        clearAll();
     }
 
     public void goToMenu(View view){
@@ -267,6 +270,7 @@ public class MainActivity extends ActionBarActivity {
     public void gotoCamera(){
         Intent intent = new Intent();
         intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT,Utils.getOutputUri());
         startActivityForResult(intent,TAKE_PHOTO_ACTIVITY);
     }
 
@@ -281,8 +285,8 @@ public class MainActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.d("dudoudebug", "" + requestCode);
-        Log.d("dudoudebug", "" + resultCode);
+        Log.d("dudoudebug", "main.onActivityResult.requestCode = " + requestCode);
+        Log.d("dudoudebug", "main.onActivityResult.resultCode = " + resultCode);
         switch (requestCode){
             case MENU_ORDER_ACTIVITY:
                 if(resultCode == RESULT_OK){
@@ -299,9 +303,9 @@ public class MainActivity extends ActionBarActivity {
             case TAKE_PHOTO_ACTIVITY:
                 if(resultCode == RESULT_OK){
                     hasPhoto = true;
-                    bitmap = data.getParcelableExtra("data");
+                    //bitmap = data.getParcelableExtra("data");
                     ImageView photo = (ImageView) findViewById(R.id.imageView);
-                    photo.setImageBitmap(bitmap);
+                    photo.setImageURI(Utils.getOutputUri());
                 }
         }
     }
