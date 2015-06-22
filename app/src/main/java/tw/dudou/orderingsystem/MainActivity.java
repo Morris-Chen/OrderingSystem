@@ -3,6 +3,8 @@ package tw.dudou.orderingsystem;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +21,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -272,16 +275,25 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d("dudoudebug", "" + requestCode);
         Log.d("dudoudebug", "" + resultCode);
-        if(requestCode == MENU_ORDER_ACTIVITY && resultCode == RESULT_OK) {
-            Log.d("dudoudebug", data.getStringExtra("orderList"));
-            try {
-                menuInfo = new JSONObject(data.getStringExtra("orderList"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            // TODO , find a better way to show the menu already selected (done).
-            showMenu();
-
+        switch (requestCode){
+            case MENU_ORDER_ACTIVITY:
+                if(resultCode == RESULT_OK){
+                    Log.d("dudoudebug", data.getStringExtra("orderList"));
+                    try {
+                        menuInfo = new JSONObject(data.getStringExtra("orderList"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // TODO , find a better way to show the menu already selected (done).
+                    showMenu();
+                }
+                break;
+            case TAKE_PHOTO_ACTIVITY:
+                if(resultCode == RESULT_OK){
+                    Bitmap bitmap = data.getParcelableExtra("data");
+                    ImageView photo = (ImageView) findViewById(R.id.imageView);
+                    photo.setImageBitmap(bitmap);
+                }
         }
     }
 
@@ -301,7 +313,6 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_take_photo) {
-
             gotoCamera();
         }
 
