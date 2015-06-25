@@ -17,6 +17,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Created by dudou on 2015/6/8.
@@ -141,6 +144,29 @@ public class Utils {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public static String fetchFromURL(String URLString){
+        URL urlObject = null;
+        try {
+            urlObject = new URL(URLString);
+            URLConnection urlConnection = urlObject.openConnection();
+            InputStream is = urlConnection.getInputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while( (len = is.read(buffer)) != -1 ) {
+                baos.write(buffer, 0, len);
+            }
+
+            return new String(baos.toByteArray());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        urlObject.getFile();
         return null;
     }
 }

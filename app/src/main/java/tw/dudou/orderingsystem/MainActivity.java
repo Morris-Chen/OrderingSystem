@@ -106,7 +106,8 @@ public class MainActivity extends ActionBarActivity {
         historyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                gotoOrderDetail();
+                String address = ((TextView) findViewById(R.id.storeInfo)).getText().toString().split(",")[1];
+                gotoOrderDetail(address);
             }
         });
 
@@ -124,17 +125,20 @@ public class MainActivity extends ActionBarActivity {
         saveStateEditor = saveState.edit();
 
         inputEditText.setText(saveState.getString("EditText", "").toString());
-        toUpperCheckBox.setChecked(saveState.getBoolean("checkBox",false));
+        toUpperCheckBox.setChecked(saveState.getBoolean("checkBox", false));
 
 
         setStoreData();
         setHistoryData();
 
+
+
     }
 
-    private void gotoOrderDetail(){
+    private void gotoOrderDetail(String address){
         Intent intent = new Intent();
         intent.setClass(this,orderDetailActivity.class);
+        intent.putExtra("address",address);
         startActivity(intent);
     }
 
@@ -216,6 +220,7 @@ public class MainActivity extends ActionBarActivity {
             orderObject.put("note", order.getString("note"));
             orderObject.put("menu", order.getJSONArray("menu"));
             orderObject.put("storeinfo", storeInfo);
+            orderObject.pinInBackground();
             if (hasPhoto){
                 ParseFile file = new ParseFile("photo.png",Utils.uriToBytes(this,Utils.getOutputUri()));
                 orderObject.put("photo",file);
