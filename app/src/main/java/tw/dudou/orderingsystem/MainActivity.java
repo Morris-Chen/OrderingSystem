@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         toUpperCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ((ImageView) findViewById(R.id.imageView)).setVisibility(isChecked?View.INVISIBLE: View.VISIBLE);
                 saveStateEditor.putBoolean("checkBox",isChecked);
                 saveStateEditor.commit();
             }
