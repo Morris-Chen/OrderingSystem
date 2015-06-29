@@ -166,7 +166,7 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        urlObject.getFile();
+        
         return null;
     }
 }

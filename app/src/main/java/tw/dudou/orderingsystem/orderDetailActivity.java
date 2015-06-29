@@ -1,27 +1,41 @@
 package tw.dudou.orderingsystem;
 
+import android.app.ProgressDialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 
 
-public class orderDetailActivity extends ActionBarActivity {
+public class orderDetailActivity extends AppCompatActivity {
 
 
     private WebView mapView;
     private TextView addressText;
+    private ProgressDialog progressDialog;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +47,8 @@ public class orderDetailActivity extends ActionBarActivity {
         addressText.setText(address);
 
         mapView = (WebView) findViewById(R.id.staticMap);
+        imageView = (ImageView) findViewById(R.id.imageMapView);
+        progressDialog = new ProgressDialog(this);
 
         asyncTask.execute(address);
     }
@@ -97,11 +113,64 @@ public class orderDetailActivity extends ActionBarActivity {
 
                 mapView.loadUrl(mapURL);
 
+                ImageLoader img = new ImageLoader();
+                img.execute(mapURL);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     };
+
+    class ImageLoader extends AsyncTask<String, Integer, byte[]> {
+        @Override
+        protected void onPreExecute() {
+            progressDialog.setTitle("ImageLoader");
+            progressDialog.setMessage("Loading...");
+            progressDialog.setCancelable(false);
+            progressDialog.setMax(100);
+            progressDialog.setProgress(0);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.show();
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            progressDialog.setProgress(values[0]);
+        }
+
+        @Override
+        protected byte[] doInBackground(String... params) {
+            try {
+                URL urlObject = new URL(params[0]);
+                URLConnection urlConnection = urlObject.openConnection();
+                InputStream is = urlConnection.getInputStream();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while( (len = is.read(buffer)) != -1 ) {
+                    baos.write(buffer, 0, len);
+                    onProgressUpdate(progressDialog.getProgress() + 10);
+                }
+                progressDialog.setProgress(30);
+                return baos.toByteArray();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new byte[0];
+        }
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+            imageView.setImageBitmap(bitmap);
+            progressDialog.setProgress(100);
+            progressDialog.dismiss();
+        }
+    }
 }
 
 //https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&markers=color:blue%7Clabel:S%7C40.702147,-74.015794

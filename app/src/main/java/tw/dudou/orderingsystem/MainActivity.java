@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -47,31 +48,37 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
+    //******* Constant definition
     private static final int MENU_ORDER_ACTIVITY = 1;
     private static final int TAKE_PHOTO_ACTIVITY = 2;
-    private JSONObject menuInfo;
 
+    //******* UI declarition
     private EditText inputEditText;
     private Button sendButton;
     private CheckBox toUpperCheckBox;
     private ListView historyListView;
     private Spinner spinner;
 
-
+    //******* Preference
     // to save all the data to /data/data/tw.dudou.ordersystem/shared_prefs/setting.xml
     private SharedPreferences saveState;
     private SharedPreferences.Editor saveStateEditor;
     private boolean hasPhoto = false;
     private Bitmap bitmap;
 
+    //******* Temp Stack variable
+    private JSONObject menuInfo;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*
 
+         */
         inputEditText = (EditText) findViewById(R.id.editText);
         inputEditText.setOnKeyListener(new View.OnKeyListener() {
             // onKeyListener's reference keyCode is reference in KeyEvent.KEYCODE_ENTER
@@ -127,15 +134,17 @@ public class MainActivity extends ActionBarActivity {
         inputEditText.setText(saveState.getString("EditText", "").toString());
         toUpperCheckBox.setChecked(saveState.getBoolean("checkBox", false));
 
-
+        //Data initialization
         setStoreData();
         setHistoryData();
-
-
 
     }
 
     private void gotoOrderDetail(String address){
+        /*
+
+
+         */
         Intent intent = new Intent();
         intent.setClass(this,orderDetailActivity.class);
         intent.putExtra("address",address);

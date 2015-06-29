@@ -3,6 +3,7 @@ package tw.dudou.orderingsystem;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,7 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class MenuActivity extends ActionBarActivity {
+public class MenuActivity extends AppCompatActivity {
     private TextView storeInfoTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
