@@ -14,6 +14,7 @@ public class OrderingSystemApplication extends Application{
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, "l6vG5tGkW0lZxWYvM7KIoW2lQNY8Ui2oaPhRtYMh",
                 "9LGsSlN6BO9dnpA740y5oX1OCP0iLeD0dPVwEfF6");
+        //Parse.initialize(this, "PihJMpOOpNYxpXN8wYcd3Jvn6R1x6IHOl6TA5gKc", "mnPmwNUDinSNH3b4RRiScFdkNRgLFxK61DVIpXYI");
         super.onCreate();
     }
 }

@@ -1,6 +1,7 @@
 package tw.dudou.orderingsystem;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -10,10 +11,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +45,11 @@ public class orderDetailActivity extends AppCompatActivity {
     private TextView addressText;
     private ProgressDialog progressDialog;
     private ImageView imageView;
+    private GoogleMap mMap;
+    private boolean imageMapVisible, webviewMapVisible;
+    private boolean imageMapLoaded, webviewMapLoaded;
+    private int imageMapH,webviewMapH;
+    private String storeAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +57,61 @@ public class orderDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_order_detail);
         addressText = (TextView) findViewById(R.id.address);
 
-        String address = getIntent().getStringExtra("address");
-        addressText.setText(address);
+        storeAddress = getIntent().getStringExtra("address");
+        addressText.setText(storeAddress);
 
         mapView = (WebView) findViewById(R.id.staticMap);
         imageView = (ImageView) findViewById(R.id.imageMapView);
         progressDialog = new ProgressDialog(this);
 
-        asyncTask.execute(address);
+        if (mMap == null) {
+            // Try to obtain the map from the SupportMapFragment.
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mymap))
+                    .getMap();
+            // Check if we were successful in obtaining the map.
+        }
+        imageMapVisible = false;
+        imageMapLoaded = false;
+        webviewMapVisible = false;
+        webviewMapLoaded = false;
+
+        mapView.setVisibility(View.GONE);
+        imageView.setVisibility(View.GONE);
+
+    }
+
+    public void showImageMap(View view){
+        if(imageMapVisible){
+            imageView.setVisibility(View.GONE);
+            imageMapVisible = false;
+            ((Button)findViewById(R.id.ImageViewButton)).setText("Show ImageView");
+        } else {
+            imageView.setVisibility(View.VISIBLE);
+            if(!imageMapLoaded) {
+                ImageLoader img = new ImageLoader();
+                img.execute(storeAddress);
+            }
+            imageMapVisible = true;
+            ((Button)findViewById(R.id.ImageViewButton)).setText("Hide ImageView");
+            imageMapLoaded = true;
+        }
+
+    }
+
+    public void showWebViewMap(View view){
+        if(webviewMapVisible){
+            mapView.setVisibility(View.GONE);
+            ((Button)findViewById(R.id.WebvViewButton)).setText("Show WebView");
+            webviewMapVisible = false;
+
+        }
+        else{
+            mapView.setVisibility(View.VISIBLE);
+            if(!webviewMapLoaded) asyncTask.execute(storeAddress);
+            ((Button)findViewById(R.id.WebvViewButton)).setText("Hide WebView");
+            webviewMapVisible = true;
+            webviewMapLoaded = true;
+        }
     }
 
     @Override
@@ -58,6 +119,15 @@ public class orderDetailActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_order_detail, menu);
         return true;
+    }
+
+    public void gotoGoogleMap(View view){
+        String address = ((TextView)findViewById(R.id.address)).getText().toString();
+        Intent intent = new Intent();
+        intent.setClass(this,MapsActivity.class);
+        intent.putExtra("address", address);
+        intent.putExtra("addJSON", address);
+        startActivity(intent);
     }
 
     @Override
@@ -80,7 +150,6 @@ public class orderDetailActivity extends AppCompatActivity {
         protected String doInBackground(String... params) {
             String address = params[0];
             String out ="";
-
             try {
                 out = Utils.fetchFromURL(
                         "https://maps.googleapis.com/maps/api/geocode/json?address="
@@ -108,13 +177,17 @@ public class orderDetailActivity extends AppCompatActivity {
 
                 String mapURL = String.format(
                         "https://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=13" +
-                        "&size=600x600&markers=color:blue%%7Clabel:S%%7C%f,%f",
+                        "&size=400x400&markers=color:blue%%7Clabel:S%%7C%f,%f",
                         lat,lng,lat,lng);
 
                 mapView.loadUrl(mapURL);
 
-                ImageLoader img = new ImageLoader();
-                img.execute(mapURL);
+                if (mMap != null) {
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng))
+                            .title("Here")
+                            .snippet(addressText.getText().toString()));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lng),13));
+                }
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -132,7 +205,6 @@ public class orderDetailActivity extends AppCompatActivity {
             progressDialog.setProgress(0);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.show();
-
         }
 
         @Override
@@ -143,7 +215,33 @@ public class orderDetailActivity extends AppCompatActivity {
         @Override
         protected byte[] doInBackground(String... params) {
             try {
-                URL urlObject = new URL(params[0]);
+
+                String address = params[0];
+                String out ="";
+
+                try {
+                    out = Utils.fetchFromURL(
+                            "https://maps.googleapis.com/maps/api/geocode/json?address="
+                                    + URLEncoder.encode(address,"utf-8"));
+
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                Log.d("debug", out);
+
+                JSONObject object = new JSONObject(out);
+                JSONObject position = object.getJSONArray("results").getJSONObject(0)
+                        .getJSONObject("geometry")
+                        .getJSONObject("location");
+
+                double lat = position.getDouble("lat");
+                double lng = position.getDouble("lng");
+
+                String mapURL = String.format(
+                        "https://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=13" +
+                                "&size=400x400&markers=color:blue%%7Clabel:S%%7C%f,%f",
+                        lat, lng, lat, lng);
+                URL urlObject = new URL(mapURL);
                 URLConnection urlConnection = urlObject.openConnection();
                 InputStream is = urlConnection.getInputStream();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -151,13 +249,13 @@ public class orderDetailActivity extends AppCompatActivity {
                 int len;
                 while( (len = is.read(buffer)) != -1 ) {
                     baos.write(buffer, 0, len);
-                    onProgressUpdate(progressDialog.getProgress() + 10);
                 }
-                progressDialog.setProgress(30);
                 return baos.toByteArray();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
             return new byte[0];
@@ -165,10 +263,12 @@ public class orderDetailActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(byte[] bytes) {
+
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
             imageView.setImageBitmap(bitmap);
             progressDialog.setProgress(100);
             progressDialog.dismiss();
+            imageMapLoaded = true;
         }
     }
 }

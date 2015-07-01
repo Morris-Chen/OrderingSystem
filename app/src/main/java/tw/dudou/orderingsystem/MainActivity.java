@@ -122,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
         toUpperCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                ((ImageView) findViewById(R.id.imageView)).setVisibility(isChecked?View.INVISIBLE: View.VISIBLE);
-                saveStateEditor.putBoolean("checkBox",isChecked);
+                ((ImageView) findViewById(R.id.imageView)).setVisibility(isChecked ? View.INVISIBLE : View.VISIBLE);
+                saveStateEditor.putBoolean("checkBox", isChecked);
                 saveStateEditor.commit();
             }
         });
@@ -135,9 +135,25 @@ public class MainActivity extends AppCompatActivity {
         inputEditText.setText(saveState.getString("EditText", "").toString());
         toUpperCheckBox.setChecked(saveState.getBoolean("checkBox", false));
 
+         // Parse homework
+/*        ParseObject orderObject = new ParseObject("HomeworkParse");
+        orderObject.put("email", "dudou@dudou.tw");
+        orderObject.put("sid", "AP25324");
+
+        orderObject.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                Log.d("debug", "LOLOLOLOLOLOLOLOLOLOLOLOLOLOLdone");
+            }
+        });
+*/
+
         //Data initialization
         setStoreData();
         setHistoryData();
+
+
+
 
     }
 
