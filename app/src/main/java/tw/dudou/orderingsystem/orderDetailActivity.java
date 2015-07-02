@@ -22,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -64,6 +65,9 @@ public class orderDetailActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.imageMapView);
         progressDialog = new ProgressDialog(this);
 
+        mapView.setVisibility(View.GONE);
+        imageView.setVisibility(View.GONE);
+
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mymap))
@@ -75,8 +79,6 @@ public class orderDetailActivity extends AppCompatActivity {
         webviewMapVisible = false;
         webviewMapLoaded = false;
 
-        mapView.setVisibility(View.GONE);
-        imageView.setVisibility(View.GONE);
 
     }
 
@@ -184,7 +186,7 @@ public class orderDetailActivity extends AppCompatActivity {
 
                 if (mMap != null) {
                     mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng))
-                            .title("Here")
+                            .title("Store")
                             .snippet(addressText.getText().toString()));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lng),13));
                 }
@@ -195,22 +197,11 @@ public class orderDetailActivity extends AppCompatActivity {
         }
     };
 
-    class ImageLoader extends AsyncTask<String, Integer, byte[]> {
+    class ImageLoader extends AsyncTask<String, Void, byte[]> {
         @Override
         protected void onPreExecute() {
-            progressDialog.setTitle("ImageLoader");
-            progressDialog.setMessage("Loading...");
-            progressDialog.setCancelable(false);
-            progressDialog.setMax(100);
-            progressDialog.setProgress(0);
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.show();
         }
 
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            progressDialog.setProgress(values[0]);
-        }
 
         @Override
         protected byte[] doInBackground(String... params) {
@@ -241,6 +232,8 @@ public class orderDetailActivity extends AppCompatActivity {
                         "https://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=13" +
                                 "&size=400x400&markers=color:blue%%7Clabel:S%%7C%f,%f",
                         lat, lng, lat, lng);
+
+
                 URL urlObject = new URL(mapURL);
                 URLConnection urlConnection = urlObject.openConnection();
                 InputStream is = urlConnection.getInputStream();
@@ -266,8 +259,6 @@ public class orderDetailActivity extends AppCompatActivity {
 
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
             imageView.setImageBitmap(bitmap);
-            progressDialog.setProgress(100);
-            progressDialog.dismiss();
             imageMapLoaded = true;
         }
     }

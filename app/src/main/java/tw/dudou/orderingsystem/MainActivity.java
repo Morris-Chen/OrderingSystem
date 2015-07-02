@@ -30,6 +30,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.appevents.AppEventsLogger;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -46,9 +47,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.facebook.FacebookSdk;
 
 
 public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Logs 'install' and 'app activate' App Events.
+        AppEventsLogger.activateApp(this);
+    }
 
     //******* Constant definition
     private static final int MENU_ORDER_ACTIVITY = 1;
@@ -136,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         toUpperCheckBox.setChecked(saveState.getBoolean("checkBox", false));
 
          // Parse homework
-/*        ParseObject orderObject = new ParseObject("HomeworkParse");
+        ParseObject orderObject = new ParseObject("HomeworkParse");
         orderObject.put("email", "dudou@dudou.tw");
         orderObject.put("sid", "AP25324");
 
@@ -361,5 +370,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Logs 'app deactivate' App Event.
+        AppEventsLogger.deactivateApp(this);
     }
 }
