@@ -5,4 +5,6 @@
     <string name="title_activity_menu">Store Menu</string>
     <string name="title_activity_order_detail">Store Position</string>
     <string name="title_activity_maps">Map</string>
+    <string name="facebook_app_id">862602793794512</string>
+    <string name="title_activity_login_activity">Login_activity</string>
 </resources>

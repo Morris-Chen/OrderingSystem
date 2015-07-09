@@ -51,13 +51,7 @@ import com.facebook.FacebookSdk;
 
 
 public class MainActivity extends AppCompatActivity {
-    @Override
-    protected void onResume() {
-        super.onResume();
 
-        // Logs 'install' and 'app activate' App Events.
-        AppEventsLogger.activateApp(this);
-    }
 
     //******* Constant definition
     private static final int MENU_ORDER_ACTIVITY = 1;
@@ -143,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
         inputEditText.setText(saveState.getString("EditText", "").toString());
         toUpperCheckBox.setChecked(saveState.getBoolean("checkBox", false));
-
+/*
          // Parse homework
         ParseObject orderObject = new ParseObject("HomeworkParse");
         orderObject.put("email", "dudou@dudou.tw");
@@ -372,11 +366,5 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
 
-        // Logs 'app deactivate' App Event.
-        AppEventsLogger.deactivateApp(this);
-    }
 }
